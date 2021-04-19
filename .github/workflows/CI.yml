@@ -14,17 +14,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
-      - name: Install fun
-        run: npm i -g @alicloud/fun
-
-      - name: Build Function
-        run: fun build -d
-
       - name: Deploy
         uses: htynkn/aliyun-serverless-action@master
         env:
@@ -32,4 +21,3 @@ jobs:
           REGION: cn-hangzhou
           ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
           ACCESS_KEY_SECRET: ${{ secrets.ACCESS_KEY_SECRET }}
-          

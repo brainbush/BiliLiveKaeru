@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <title>好耶</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="form-group">
+                <label for="room_id">房间号：</label>
+                <input type="text" class="form-control" id="room_id" v-model="room_id">
+            </div>
+            <div class="form-group">
+                <label for="area_1">分区：</label>
+                <div class="row">
+                    <div class="col">
+                        <select class="form-control" id="area_1" v-model="area_1">
+                            <option v-for="area in area_list" v-bind:key="area.id" v-bind:value="area.id">{{area.name}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <select class="form-control" v-model="area_v2">
+                            <option v-for="area in area2_list" v-bind:key="area.id" v-bind:value="area.id">{{area.name}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="cookies">COOKIES：</label>
+                <input type="text" class="form-control" v-model="cookies">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary" v-on:click="start_live">开播</button>
+                <button class="btn btn-primary" v-on:click="start_scan">扫码登录</button>
+            </div>
+            <div v-if="show_qr">
+                <div class="row" id="qrcode"></div>
+                <div class="row mt-3 alert alert-primary" v-if="alert_text.length">{{alert_text}}</div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    let app = new Vue({
+        el: '#app',
+        data() {
+            return {
+                area_list: [],
+                area2_list: [],
+                cookies: '',
+                area_1: 0,
+                area_v2: 0,
+                room_id: null,
+                show_qr: false,
+                oauthKey: null,
+                qr: null,
+                alert_text: ''
+            }
+        },
+        mounted() {
+            this.get_area_list();
+        },
+        methods: {
+            get_area_list: function () {
+                axios.get('area_list').then(function (response) {
+                    this.area_list = response.data
+                }.bind(this))
+            },
+            start_live: function () {
+                axios.post('', { cookies: this.cookies, area_v2: parseInt(this.area_v2), room_id: parseInt(this.room_id) })
+                    .then(function (response) {
+                        let data = response.data;
+                        let code = data.code;
+                        console.log(data)
+                        if (code === 0) {
+                            alert('成功')
+                        } else {
+                            alert('失败')
+                        }
+                    })
+            },
+            start_scan: function () {
+                this.show_qr = true;
+                this.oauthKey = ''
+                axios.get('scan').then(function (response) {
+                    let data = response.data.data;
+                    this.oauthKey = data.oauthKey;
+                    this.qr = new QRCode(document.getElementById("qrcode"), data.url);
+                    this.timer = setTimeout(this.refresh_scan, 3000);
+                }.bind(this))
+            },
+            refresh_scan: function () {
+                if (this.show_qr === false) {
+                    clearTimeout(this.timer)
+                    return
+                } else {
+                    this.timer = setTimeout(this.refresh_scan, 3000)
+                }
+                console.log('fresh scan')
+                axios.post('scan', { oauthKey: this.oauthKey }).then(function (response) {
+                    let data = response.data
+                    let code = data.data
+                    console.log(data)
+                    if (code === -2 || code === -1) {
+                        //二维码过期或者不存在，重新拿二维码
+                        this.alert_text = ''
+                        this.start_scan()
+                        return
+                    } else if (code === -4) {
+                        this.alert_text = '等待扫描'
+                        //等待扫描
+                    } else if (code === -5) {
+                        //已扫描，等待确认
+                        this.alert_text = '等待确认'
+                    } else if (code instanceof Object) {
+                        //已确认登录
+                        console.log('logged')
+                        this.cookies = data.cookies
+                        this.qr.clear();
+                        this.show_qr = false
+                        this.alert_text = ''
+                        clearTimeout(this.timer)
+                        return
+                    }
+                }.bind(this))
+            }
+        },
+        watch: {
+            area_1: function (area) {
+                this.area2_list = this.area_list.find(x => x.id === area).list;
+            }
+        }
+    })
+</script>
+
+</html>

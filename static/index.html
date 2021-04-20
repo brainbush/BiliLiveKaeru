@@ -45,8 +45,8 @@
             </div>
             <div v-if="show_qr">
                 <div class="row" id="qrcode"></div>
-                <div class="row mt-3 alert alert-primary" v-if="alert_text.length">{{alert_text}}</div>
             </div>
+            <div class="row mt-3 alert alert-primary" v-if="alert_text.length">{{alert_text}}</div>
         </div>
     </div>
 </body>
@@ -90,6 +90,11 @@
                     })
             },
             start_scan: function () {
+                if(this.show_qr){
+                    this.show_qr = false;
+                    this.alert_text = ''
+                    return
+                }
                 this.show_qr = true;
                 this.oauthKey = ''
                 axios.get('scan').then(function (response) {

@@ -26,11 +26,7 @@ def index():
         )
         headers = {
             "User-Agent": ua,
-            # "origin": "https://link.bilibili.com",
-            # "referrer": "https://link.bilibili.com/p/center/index",
         }
-        print(headers)
-        print(post_data)
         r = requests.post(
             "https://api.live.bilibili.com/room/v1/Room/startLive",
             headers=headers,

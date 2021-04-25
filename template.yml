@@ -3,6 +3,11 @@ Transform: "Aliyun::Serverless-2018-04-03"
 Resources:
   live_s2:
     Type: "Aliyun::Serverless::Service"
+    Properties:
+      LogConfig:
+        Project: live-log-neeemooo
+        Logstore: live-log-store
+        EnableRequestMetrics: true
     live_s2:
       Type: "Aliyun::Serverless::Function"
       Properties:

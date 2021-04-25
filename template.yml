@@ -24,3 +24,10 @@ Resources:
           '/*':
             ServiceName: live_s2
             FunctionName: live_s2
+  live-log:
+  Type: 'Aliyun::Serverless::Log'
+  live-log-store:
+    Type: 'Aliyun::Serverless::Log::Logstore'
+    Properties:
+      TTL: 30
+      ShardCount: 1

@@ -24,7 +24,7 @@ Resources:
           '/*':
             ServiceName: live_s2
             FunctionName: live_s2
-  live-log:
+  live-log-neeemooo:
     Type: 'Aliyun::Serverless::Log'
     Properties:
       Description: 'logging'

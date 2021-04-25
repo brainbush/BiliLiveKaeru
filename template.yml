@@ -26,6 +26,8 @@ Resources:
             FunctionName: live_s2
   live-log:
     Type: 'Aliyun::Serverless::Log'
+    Properties:
+      Description: 'logging'
     live-log-store:
       Type: 'Aliyun::Serverless::Log::Logstore'
       Properties:

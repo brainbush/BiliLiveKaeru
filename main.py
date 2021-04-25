@@ -1,8 +1,10 @@
 import flask
 import requests
+import logging
 from flask import request, render_template
 
 app = flask.Flask(__name__)
+logger = logging.getLogger()
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -17,6 +19,7 @@ def index():
             cookies = dict(p.split("=") for p in plain_cookies.split("; "))
         except ValueError:
             return flask.jsonify({})
+        logger.info("room_id: {}".format(content.get("room_id")))
         post_data = dict(
             room_id=content.get("room_id"),
             platform="pc",
